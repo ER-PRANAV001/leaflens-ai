@@ -1,6 +1,6 @@
 flask
 gunicorn
 numpy
-pillow
-tensorflow-cpu
+Pillow==10.2.0
+tensorflow-cpu==2.13.0
 werkzeug
