@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <meta name="theme-color" content="#5dba6e"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="LeafLens AI"/>
+  <meta name="description" content="AI powered crop disease detection"/>
+  <title>LeafLens AI — Crop Disease Detector</title>
+  <link rel="manifest" href="/static/manifest.json"/>
+  <link rel="apple-touch-icon" href="/static/icon-192.png"/>
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico"/>
+<link rel="shortcut icon" href="/static/favicon.ico"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <header>
+    <div class="logo">
+      <span class="logo-icon">🍃</span>
+      <span class="logo-text">LeafLens AI</span>
+    </div>
+    <nav class="badge-row">
+      <span class="badge">AI-Powered</span>
+      <span class="badge">38 Diseases</span>
+      <span class="badge">Instant</span>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <p class="hero-eyebrow">PLANT HEALTH INTELLIGENCE</p>
+    <h1 class="hero-title">Detect Crop Disease<br/><em>in Seconds</em></h1>
+    <p class="hero-sub">Upload or take a photo of any leaf and get instant AI-powered disease diagnosis with treatment tips.</p>
+  </section>
+
+  <main>
+    <div class="upload-card" id="uploadCard">
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*" hidden/>
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden/>
+
+        <div class="drop-inner" id="dropInner">
+          <div class="upload-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 16.5V19a1 1 0 001 1h14a1 1 0 001-1v-2.5"/>
+              <polyline points="16 10 12 6 8 10"/>
+              <line x1="12" y1="6" x2="12" y2="18"/>
+            </svg>
+          </div>
+          <p class="drop-title">Scan a Leaf</p>
+          <p class="drop-sub">Upload or take a photo to detect disease</p>
+          <div class="btn-group">
+            <button class="upload-option-btn"
+              onclick="document.getElementById('fileInput').click()">
+              📁 Gallery
+            </button>
+            <button class="upload-option-btn camera-btn"
+              onclick="document.getElementById('cameraInput').click()">
+              📷 Camera
+            </button>
+          </div>
+          <p class="drop-hint">PNG, JPG, JPEG — max 16MB</p>
+        </div>
+
+        <div class="preview-wrap" id="previewWrap" style="display:none">
+          <img id="previewImg" src="" alt="Preview"/>
+          <button class="clear-btn" id="clearBtn">✕</button>
+        </div>
+      </div>
+
+      <button class="analyze-btn" id="analyzeBtn" disabled>
+        <span id="btnText">Analyze with LeafLens AI</span>
+        <span class="btn-icon">→</span>
+        <span class="btn-loader" id="btnLoader" style="display:none"></span>
+      </button>
+    </div>
+
+    <!-- Results -->
+    <div class="results-panel" id="resultsPanel" style="display:none">
+      <div class="result-header">
+        <div class="result-badge" id="resultBadge">LeafLens AI Diagnosis</div>
+        <h2 class="result-disease" id="resultDisease">—</h2>
+        <p class="result-crop" id="resultCrop">Crop: —</p>
+      </div>
+
+      <div class="result-grid">
+        <div class="result-card confidence-card">
+          <p class="rc-label">Confidence</p>
+          <div class="confidence-ring-wrap">
+            <svg class="confidence-ring" viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="34" class="ring-bg"/>
+              <circle cx="40" cy="40" r="34" class="ring-fill" id="ringFill"/>
+            </svg>
+            <span class="confidence-num" id="confidenceNum">—</span>
+          </div>
+          <div class="severity-pill" id="severityPill">—</div>
+        </div>
+
+        <div class="result-card description-card">
+          <p class="rc-label">📋 Description</p>
+          <p class="rc-body" id="resultDesc">—</p>
+        </div>
+
+        <div class="result-card treatment-card">
+          <p class="rc-label">💊 Treatment</p>
+          <p class="rc-body" id="resultTreatment">—</p>
+        </div>
+
+        <div class="result-card prevention-card">
+          <p class="rc-label">🛡️ Prevention</p>
+          <p class="rc-body" id="resultPrevention">—</p>
+        </div>
+      </div>
+
+      <div class="top-preds">
+        <p class="rc-label">Top Predictions</p>
+        <div id="topPredsList" class="preds-list"></div>
+      </div>
+
+      <button class="reset-btn" id="resetBtn">🔍 Scan Another Leaf</button>
+    </div>
+
+    <!-- Error -->
+    <div class="error-box" id="errorBox" style="display:none">
+      <span class="error-icon">⚠️</span>
+      <span id="errorMsg">Something went wrong.</span>
+    </div>
+  </main>
+
+  <footer>
+    <p>🍃 LeafLens AI — Results are indicative only. Consult an agronomist for critical decisions.</p>
+  </footer>
+
+  <!-- Install Banner -->
+  <div class="install-banner" id="installBanner" style="display:none">
+    <div class="install-content">
+      <img src="/static/icon-192.png" class="install-app-icon" alt="LeafLens AI"/>
+      <div class="install-text">
+        <strong>Install LeafLens AI</strong>
+        <p>Add to home screen for quick access</p>
+      </div>
+    </div>
+    <div class="install-buttons">
+      <button class="install-yes" id="installBtn">Install</button>
+      <button class="install-no" id="dismissBtn">✕</button>
+    </div>
+  </div>
+
+<script>
+// ── Service Worker ────────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/static/sw.js')
+    .then(() => console.log('LeafLens AI SW registered'))
+    .catch(e => console.log('SW error:', e));
+}
+
+// ── Install Prompt ────────────────────────────────────────────────────────────
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(() => {
+    document.getElementById('installBanner').style.display = 'flex';
+  }, 3000);
+});
+
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  }
+  document.getElementById('installBanner').style.display = 'none';
+});
+
+document.getElementById('dismissBtn').addEventListener('click', () => {
+  document.getElementById('installBanner').style.display = 'none';
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').style.display = 'none';
+});
+
+// ── File Handling ─────────────────────────────────────────────────────────────
+const fileInput    = document.getElementById('fileInput');
+const cameraInput  = document.getElementById('cameraInput');
+const dropZone     = document.getElementById('dropZone');
+const dropInner    = document.getElementById('dropInner');
+const previewWrap  = document.getElementById('previewWrap');
+const previewImg   = document.getElementById('previewImg');
+const clearBtn     = document.getElementById('clearBtn');
+const analyzeBtn   = document.getElementById('analyzeBtn');
+const btnText      = document.getElementById('btnText');
+const btnLoader    = document.getElementById('btnLoader');
+const resultsPanel = document.getElementById('resultsPanel');
+const errorBox     = document.getElementById('errorBox');
+const errorMsg     = document.getElementById('errorMsg');
+
+let selectedFile = null;
+
+fileInput.addEventListener('change',   () => { if (fileInput.files[0])   handleFile(fileInput.files[0]);   });
+cameraInput.addEventListener('change', () => { if (cameraInput.files[0]) handleFile(cameraInput.files[0]); });
+
+dropZone.addEventListener('dragover',  (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+
+function handleFile(f) {
+  selectedFile = f;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewImg.src = e.target.result;
+    dropInner.style.display   = 'none';
+    previewWrap.style.display = 'flex';
+    analyzeBtn.disabled = false;
+    analyzeBtn.classList.add('ready');
+  };
+  reader.readAsDataURL(f);
+}
+
+clearBtn.addEventListener('click', (e) => { e.stopPropagation(); resetUpload(); });
+
+function resetUpload() {
+  selectedFile      = null;
+  fileInput.value   = '';
+  cameraInput.value = '';
+  previewImg.src    = '';
+  dropInner.style.display    = '';
+  previewWrap.style.display  = 'none';
+  analyzeBtn.disabled = true;
+  analyzeBtn.classList.remove('ready');
+  resultsPanel.style.display = 'none';
+  errorBox.style.display     = 'none';
+}
+
+// ── Predict ───────────────────────────────────────────────────────────────────
+analyzeBtn.addEventListener('click', async () => {
+  if (!selectedFile) return;
+  btnText.style.display   = 'none';
+  btnLoader.style.display = 'inline-block';
+  analyzeBtn.querySelector('.btn-icon').style.display = 'none';
+  analyzeBtn.disabled        = true;
+  resultsPanel.style.display = 'none';
+  errorBox.style.display     = 'none';
+
+  const formData = new FormData();
+  formData.append('file', selectedFile);
+
+  try {
+    const res  = await fetch('/predict', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (!res.ok || data.error) { showError(data.error || 'Prediction failed.'); return; }
+    renderResults(data);
+  } catch (err) {
+    showError('Cannot connect. Make sure LeafLens AI server is running on same WiFi.');
+  } finally {
+    btnText.style.display   = '';
+    btnLoader.style.display = 'none';
+    analyzeBtn.querySelector('.btn-icon').style.display = '';
+    analyzeBtn.disabled = false;
+  }
+});
+
+// ── Render Results ────────────────────────────────────────────────────────────
+function renderResults(data) {
+  const d = data.disease;
+  document.getElementById('resultDisease').textContent    = d.name;
+  document.getElementById('resultCrop').textContent       = `Crop: ${d.crop}`;
+  document.getElementById('resultDesc').textContent       = d.description;
+  document.getElementById('resultTreatment').textContent  = d.treatment;
+  document.getElementById('resultPrevention').textContent = d.prevention;
+  document.getElementById('confidenceNum').textContent    = `${data.confidence}%`;
+
+  const pill = document.getElementById('severityPill');
+  pill.textContent = `Severity: ${d.severity}`;
+  pill.className   = `severity-pill sev-${d.severity.toLowerCase()}`;
+
+  const badge = document.getElementById('resultBadge');
+  badge.style.background  = d.color + '22';
+  badge.style.color       = d.color;
+  badge.style.borderColor = d.color + '44';
+
+  const circ = 2 * Math.PI * 34;
+  const ring = document.getElementById('ringFill');
+  ring.style.strokeDasharray  = circ;
+  ring.style.strokeDashoffset = circ * (1 - data.confidence / 100);
+  ring.style.stroke = d.color;
+
+  document.getElementById('topPredsList').innerHTML =
+    data.top_predictions.map(p => `
+      <div class="pred-row">
+        <span class="pred-name">${p.name}</span>
+        <div class="pred-bar-wrap">
+          <div class="pred-bar" style="width:${p.confidence}%;background:${d.color}"></div>
+        </div>
+        <span class="pred-pct">${p.confidence}%</span>
+      </div>`).join('');
+
+  resultsPanel.style.display = 'block';
+  resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showError(msg) {
+  errorMsg.textContent   = msg;
+  errorBox.style.display = 'flex';
+}
+
+document.getElementById('resetBtn').addEventListener('click', resetUpload);
+</script>
+</body>
+</html>
