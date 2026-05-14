@@ -12,6 +12,13 @@ Features
 - 📱 Installable as mobile app (PWA)
 - 🌿 Supports: Tomato, Corn, Grape, Potato, Apple and more
 
+project working images
+- <img width="4096" height="3072" alt="IMG_20260514_112401533_HDR jpg" src="https://github.com/user-attachments/assets/c5a256c8-e6cc-4dc0-b8b3-dbf65f50a9ce" />
+- <img width="3072" height="4096" alt="IMG_20260514_112320825_HDR jpg" src="https://github.com/user-attachments/assets/e1c5c769-8a0d-4122-832e-f5da9d5931be" />
+- <img width="3072" height="4096" alt="IMG_20260514_112435320_HDR jpg" src="https://github.com/user-attachments/assets/fa6aceba-d89b-4500-8b58-a148ad2dec9a" />
+- <img width="4096" height="3072" alt="IMG_20260514_112147154_HDR jpg" src="https://github.com/user-attachments/assets/6f5b7b7e-0eb0-4f73-bfb4-f0e0effd4758" />
+
+
 Tech Stack
 - Python Flask
 - TensorFlow / Keras (MobileNetV2)
